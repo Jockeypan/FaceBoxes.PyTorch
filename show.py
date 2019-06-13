@@ -2,8 +2,8 @@
 """
  show.py
  @created Mon Jan 21 2019 17:11:14 GMT+0800 (CST)
- @author: Jimmy Pan
- @E-mail: jimmypan@forwardx.com
+ @author: Jockey Pan
+ @E-mail: jockeypan@hotmail.com
 
  @description:
 """

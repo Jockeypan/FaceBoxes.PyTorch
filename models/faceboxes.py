@@ -85,6 +85,8 @@ class FaceBoxes(nn.Module):
     
     if self.phase == 'test':
         self.softmax = nn.Softmax(dim=-1)
+    if self.phase == 'trans':
+        self.softmax = nn.Softmax(dim=-1)
 
     if self.phase == 'train':
         for m in self.modules():
@@ -112,6 +114,8 @@ class FaceBoxes(nn.Module):
   def forward(self, x):
   
     sources = list()
+    src_l = list()
+    src_c = list()
     loc = list()
     conf = list()
     detection_dimension = list()
@@ -124,23 +128,36 @@ class FaceBoxes(nn.Module):
     x = self.inception2(x)
     x = self.inception3(x)
     detection_dimension += [x.shape[2:]]
-    sources.append(x)
+    src_l.append(self.loc[0](x))
+    src_c.append(self.conf[0](x))
+    # sources.append(x)
     x = self.conv3_1(x)
     x = self.conv3_2(x)
     detection_dimension.append(x.shape[2:])
-    sources.append(x)
+    src_l.append(self.loc[1](x))
+    src_c.append(self.conf[1](x))
+    # sources.append(x)
     x = self.conv4_1(x)
     x = self.conv4_2(x)
     detection_dimension.append(x.shape[2:])
-    sources.append(x)
+    src_l.append(self.loc[2](x))
+    src_c.append(self.conf[2](x))
+    # sources.append(x)
     
     detection_dimension = torch.Tensor(detection_dimension)
-    detection_dimension = detection_dimension.cuda()
+    # detection_dimension = detection_dimension.cuda()
 
-    for (x, l, c) in zip(sources, self.loc, self.conf):
-        loc.append(l(x).permute(0, 2, 3, 1).contiguous())
-        conf.append(c(x).permute(0, 2, 3, 1).contiguous())
-        
+    # for (x, l, c) in zip(sources, self.loc, self.conf):
+    #     loc.append(l(x).permute(0, 2, 3, 1).contiguous())
+    #     conf.append(c(x).permute(0, 2, 3, 1).contiguous())
+    for (l, c) in zip(src_l, src_c):
+        sources.append(l)
+        sources.append(c)
+    for l in src_l:
+        loc.append(l.permute(0, 2, 3, 1).contiguous())
+    for c in src_c:
+        conf.append(c.permute(0, 2, 3, 1).contiguous())
+
     loc = torch.cat([o.view(o.size(0), -1) for o in loc], 1)
     conf = torch.cat([o.view(o.size(0), -1) for o in conf], 1)
 
@@ -148,6 +165,8 @@ class FaceBoxes(nn.Module):
       output = (loc.view(loc.size(0), -1, 4),
                 self.softmax(conf.view(-1, self.num_classes)),
                 detection_dimension)
+    elif self.phase == "trans":
+      output = sources
     else:
       output = (loc.view(loc.size(0), -1, 4),
                 conf.view(conf.size(0), -1, self.num_classes),
