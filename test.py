@@ -17,9 +17,9 @@ parser = argparse.ArgumentParser(description='FaceBoxes')
 parser.add_argument('-m', '--trained_model', default='weights/FaceBoxes.pth',
                     type=str, help='Trained state_dict file path to open')
 parser.add_argument('--save_folder', default='eval/', type=str, help='Dir to save results')
-parser.add_argument('--cuda', default=True, type=bool, help='Use cuda to train model')
-parser.add_argument('--cpu', default=False, type=bool, help='Use cpu nms')
-parser.add_argument('--dataset', default='FDDB', type=str, choices=['AFW', 'PASCAL', 'FDDB'], help='dataset')
+parser.add_argument('--cuda', default=False, type=bool, help='Use cuda to train model')
+parser.add_argument('--cpu', default=True, type=bool, help='Use cpu nms')
+parser.add_argument('--dataset', default='FWDX', type=str, choices=['AFW', 'PASCAL', 'FDDB','FWDX'], help='dataset')
 parser.add_argument('--confidence_threshold', default=0.05, type=float, help='confidence_threshold')
 parser.add_argument('--top_k', default=5000, type=int, help='top_k')
 parser.add_argument('--nms_threshold', default=0.3, type=float, help='nms_threshold')
@@ -49,8 +49,9 @@ def remove_prefix(state_dict, prefix):
 
 def load_model(model, pretrained_path):
     print('Loading pretrained model from {}'.format(pretrained_path))
-    device = torch.cuda.current_device()
-    pretrained_dict = torch.load(pretrained_path, map_location=lambda storage, loc: storage.cuda(device))
+    # device = torch.cuda.current_device()
+    # pretrained_dict = torch.load(pretrained_path, map_location=lambda storage, loc: storage.cuda(device))
+    pretrained_dict = torch.load(pretrained_path, map_location='cpu')
     if "state_dict" in pretrained_dict.keys():
         pretrained_dict = remove_prefix(pretrained_dict['state_dict'], 'module.')
     else:
@@ -92,6 +93,8 @@ if __name__ == '__main__':
         resize = 2.5
     elif args.dataset == "AFW":
         resize = 1
+    elif args.dataset == "FWDX":
+        resize = 1.0 / 3.0
 
     _t = {'forward_pass': Timer(), 'misc': Timer()}
 
@@ -163,7 +166,7 @@ if __name__ == '__main__':
                 ymin = dets[k, 1]
                 xmax = dets[k, 2]
                 ymax = dets[k, 3]
-                ymin += 0.2 * (ymax - ymin + 1)
+                # ymin += 0.2 * (ymax - ymin + 1)
                 score = dets[k, 4]
                 fw.write('{:s} {:.3f} {:.1f} {:.1f} {:.1f} {:.1f}\n'.format(img_name, score, xmin, ymin, xmax, ymax))
         print('im_detect: {:d}/{:d} forward_pass_time: {:.4f}s misc: {:.4f}s'.format(i + 1, num_images, _t['forward_pass'].average_time, _t['misc'].average_time))

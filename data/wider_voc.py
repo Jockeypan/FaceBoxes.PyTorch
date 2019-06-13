@@ -11,7 +11,7 @@ else:
     import xml.etree.ElementTree as ET
 
 
-WIDER_CLASSES = ( '__background__', 'face')
+WIDER_CLASSES = ( '__background__', 'person')
 
 
 class AnnotationTransform(object):

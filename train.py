@@ -33,7 +33,7 @@ args = parser.parse_args()
 if not os.path.exists(args.save_folder):
     os.mkdir(args.save_folder)
 
-img_dim = 1024
+img_dim = 512
 rgb_means = (104, 117, 123)
 num_classes = 2
 batch_size = args.batch_size

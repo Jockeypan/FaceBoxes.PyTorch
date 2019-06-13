@@ -68,8 +68,8 @@ class FaceBoxes(nn.Module):
     self.num_classes = num_classes
     self.size = size
     
-    self.conv1 = CRelu(3, 24, kernel_size=7, stride=4, padding=3)
-    self.conv2 = CRelu(48, 64, kernel_size=5, stride=2, padding=2)
+    self.conv1 = CRelu(3, 24, kernel_size=5, stride=2, padding=2)
+    self.conv2 = CRelu(48, 64, kernel_size=3, stride=2, padding=1)
     
     self.inception1 = Inception()
     self.inception2 = Inception()
@@ -101,8 +101,8 @@ class FaceBoxes(nn.Module):
   def multibox(self, num_classes):
     loc_layers = []
     conf_layers = []
-    loc_layers += [nn.Conv2d(128, 21 * 4, kernel_size=3, padding=1)]
-    conf_layers += [nn.Conv2d(128, 21 * num_classes, kernel_size=3, padding=1)]
+    loc_layers += [nn.Conv2d(128, 5 * 4, kernel_size=3, padding=1)]
+    conf_layers += [nn.Conv2d(128, 5 * num_classes, kernel_size=3, padding=1)]
     loc_layers += [nn.Conv2d(256, 1 * 4, kernel_size=3, padding=1)]
     conf_layers += [nn.Conv2d(256, 1 * num_classes, kernel_size=3, padding=1)]
     loc_layers += [nn.Conv2d(256, 1 * 4, kernel_size=3, padding=1)]
